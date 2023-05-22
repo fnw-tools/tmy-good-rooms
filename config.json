@@ -1,12 +1,13 @@
 {
-  "title": "",
+  "title": "\u586b\u5bc6\u8bed\u7ea2\u5b9d\u4e66",
   "author": "",
-  "desc": "",
+  "desc": "\u5fae\u4fe1\u516c\u4f17\u53f7\u586b\u5bc6\u8bed\u4e2d\u7684\u804a\u5929\u5ba4\u5b9a\u4e49\u7cbe\u5f69\u96c6\u5408",
   "keywords": "",
   "ver": "",
   "quoto": "easy-book",
   "files": [
-    "0. \u76ee\u5f55"
+    "0. \u76ee\u5f55",
+    "01. \u5b66\u4e60\u5916\u8bed"
   ],
-  "checksum": "6aa9bbab2c6c7f71801aea942dd6bd2fecf10c3a1bfdd83451d49f1c5fe2fb4f"
+  "checksum": "f9035dfc072fa25051ec521fc108a104bc026ff6618be9b5ebcf25066711fd46"
 }

@@ -187,6 +187,8 @@ window.addEventListener('load', function() {
       viewerNode.scrollTop = 0;
       _last_md_tag = newTag;
       
+      viewer.trigger('md_loaded');
+      
       let mdNodes = mdNavNode.querySelectorAll('a.list-group-item');
       let currNav = mdNodes[idx];
       if (currNav) {
@@ -301,6 +303,107 @@ window.addEventListener('load', function() {
 </script>
 
 <script src="https://www.fn-share.com/static/tools/easy_book/nav_bar.0.1.js" defer></script>
+
+<!-- following is newly added -->
+<style>
+pre > code.tmy-room {
+  display: none;
+}
+.room-qr img {
+  width: 100%;
+}
+</style>
+
+<div class="modal" tabindex="-1" id="msgbox-modal">
+  <div class="modal-dialog" style="max-width:75%">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"></h5>
+      </div>
+      <div class="modal-body text-break"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary shadow-none" data-bs-dismiss="modal" id="btn-msgbox-ok">确定</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.fn-share.com/static/js/qrcode.min.js"></script>
+
+<script>
+const _msgboxModal = new bootstrap.Modal($('#msgbox-modal'),{backdrop:'static',keyboard:true});
+
+const _crc_table = new Uint32Array(256);
+
+for (let i = 0; i < 256; i++) {
+  let c = i;
+  for (let k = 0; k < 8; k++) { 
+    c = (c & 1)? (c >>> 1) ^ 0xedb88320: c >>> 1;
+  }
+  _crc_table[i] = c;
+}
+
+// crc32((new TextEncoder()).encode('Hello')) >>> 0
+function crc32(bytes) {
+  let crc = -1;
+  for (let i=0; i < bytes.length; i++) {
+    crc = (crc >>> 8) ^ _crc_table[(crc ^ bytes[i]) & 0xFF];
+  }
+  return crc ^ -1;
+}
+
+function showRoomDef(event) {
+  if (event.target.nodeName != 'A') return;
+  event.stopPropagation();
+  event.preventDefault();
+  
+  let s = JSON.stringify(event.target.json,null,2);
+  $('#msgbox-modal .modal-title').html('聊天室定义');
+  $('#msgbox-modal .modal-body').html('<pre><code>' + s + '</code></pre>');
+  _msgboxModal.show();
+}
+
+function setupQrCode() {
+  let url = location.href;
+  let qrNodes = $('#md-txt-view .room-qr');
+  qrNodes.each( (idx,node) => {
+    let qr = new QRCode(node);
+    qr.makeCode(url + '#crc=' + node.getAttribute('crc'));
+  });
+}
+
+$('#md-txt-view').bind('md_loaded', ev => {
+  let viewer = $(ev.target);
+  viewer.find('.tmy-room').each( (idx,node) => {
+    let descNode = $(node).parents('pre').next();
+    if (descNode.find('.room-qr').length) return;  // already exists
+    if (!descNode.hasClass('tmy-room-desc')) return;
+    
+    try {
+      let s = node.innerText;
+      let crc = crc32((new TextEncoder()).encode(s)) >>> 0;
+      let room = JSON.parse(s);
+      
+      let newNode = $(
+`<div class="card m-3 ms-5" style="width:22rem;"><div class="card-body">
+  <h5 class="card-title">${room.room_name}</h5>
+  <p class="card-text">${room.room_desc} <a class="show-json" onclick="showRoomDef(event)" href="javascript:void(0)">查看定义</a></p>
+  <div class="room-qr"></div>
+</div></div>` );
+      descNode.before(newNode);
+      newNode.find('.show-json')[0].json = room;
+      newNode.find('.room-qr').attr('crc',crc+'');
+    }
+    catch(e) {
+      if (e instanceof SyntaxError)
+        alert('Room definition error: ' + e.message);
+      console.log(e);
+    }
+  });
+  
+  setupQrCode();
+});
+</script>
 
 </body>
 </html>
