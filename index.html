@@ -364,7 +364,17 @@ function showRoomDef(event) {
 }
 
 function setupQrCode() {
-  let url = location.href;
+  if (!_last_md_tag) return;
+  let idx = MD_TAGS.indexOf(_last_md_tag);
+  if (idx < 0) return;
+  
+  let md_files = document.body.fns_config.files;
+  let url = md_files[idx] + '.md';
+  
+  let lnkNode = document.createElement('a');
+  lnkNode.setAttribute('href',url);
+  url = lnkNode.href;
+  
   let qrNodes = $('#md-txt-view .room-qr');
   qrNodes.each( (idx,node) => {
     let qr = new QRCode(node);
